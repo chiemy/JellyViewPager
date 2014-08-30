@@ -1,37 +1,57 @@
 package com.example.cviewpager;
 
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends FragmentActivity {
 	private LayoutInflater inflater;
-	MyViewPager pager;
+	JellyViewPager pager;
 	int currentItem;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		inflater = LayoutInflater.from(this);
-		pager = (MyViewPager) findViewById(R.id.myViewPager1);
+		pager = (JellyViewPager) findViewById(R.id.myViewPager1);
 		pager.setAdapter(new MyAdapter());
+		pager.setOnPageChangeListener(new OnPageChangeListener() {
+			@Override
+			public void onPageSelected(int arg0) {
+				Toast.makeText(MainActivity.this, "" + arg0, Toast.LENGTH_SHORT).show();
+			}
+			
+			@Override
+			public void onPageScrolled(int arg0, float arg1, int arg2) {
+			}
+			
+			@Override
+			public void onPageScrollStateChanged(int arg0) {
+			}
+		});
 	}
 	
 	public void onClick(View view) {
-		pager.setCurrentItem(pager.getCurrentItem() + 1);
+		switch(view.getId()){
+		case R.id.preBtn:
+			pager.showPre();
+			break;
+		case R.id.nextBtn:
+			pager.showNext();
+			break;
+		}
 	}
 	
-	public class MyAdapter implements SampleAdapter{
+	public class MyAdapter implements JellyPagerAdapter{
 
 		@Override
 		public int getCount() {
-			return 5;
+			return 10;
 		}
 
 		@Override
@@ -40,20 +60,12 @@ public class MainActivity extends FragmentActivity {
 		}
 
 		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-
-		@Override
-		public View getView(int position,View convertView,ViewGroup container) {
+		public View getView(int position,View convertView) {
 			if(convertView == null){
 				convertView = inflater.inflate(R.layout.frag_layout, null);
-				convertView.setBackgroundColor(Color.BLUE);
 			}
-			ImageView iv = ViewHolder.get(convertView, R.id.imageView1);
 			TextView tv = ViewHolder.get(convertView,R.id.tv);
 			tv.setText(position + "");
-			iv.setImageResource(getItem(position));
 			return convertView;
 		}
 		

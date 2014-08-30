@@ -4,21 +4,30 @@
     android:layout_height="match_parent"
     tools:context="com.example.cviewpager.MainActivity" >
 	
-    <com.example.cviewpager.MyViewPager
+    <com.example.cviewpager.JellyViewPager
         android:id="@+id/myViewPager1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true" >
-    </com.example.cviewpager.MyViewPager>
+    </com.example.cviewpager.JellyViewPager>
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/preBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:onClick="onClick"
-        android:text="下一个" />
+        android:text="上一页" />
+
+    <Button
+        android:id="@+id/nextBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:onClick="onClick"
+        android:text="下一页" />
 	
 </RelativeLayout>

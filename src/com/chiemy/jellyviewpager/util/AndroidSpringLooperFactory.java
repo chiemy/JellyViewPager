@@ -8,7 +8,7 @@
  *
  */
 
-package com.example.cviewpager;
+package com.chiemy.jellyviewpager.util;
 
 import android.annotation.TargetApi;
 import android.os.Build;

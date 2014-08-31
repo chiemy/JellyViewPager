@@ -1,4 +1,4 @@
-package com.example.cviewpager;
+package com.chiemy.jellyviewpager.widget;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -17,6 +17,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.chiemy.jellyviewpager.util.SpringSystem;
 import com.facebook.rebound.BaseSpringSystem;
 import com.facebook.rebound.SimpleSpringListener;
 import com.facebook.rebound.Spring;
@@ -155,7 +156,7 @@ public class JellyViewPager extends ViewPager {
 	 * 
 	 * @return
 	 */
-	private boolean hasNext() {
+	public boolean hasNext() {
 		return getCurrentItem() < mAdapter.getCount() - 1;
 	}
 
@@ -164,7 +165,7 @@ public class JellyViewPager extends ViewPager {
 	 * 
 	 * @return
 	 */
-	private boolean hasPre() {
+	public boolean hasPre() {
 		return getCurrentItem() > 0;
 	}
 
@@ -251,8 +252,6 @@ public class JellyViewPager extends ViewPager {
 			} else {
 				// 角度回正
 				rotateSpring.setEndValue(0);
-				Toast.makeText(getContext(), "已经是最后一条", Toast.LENGTH_SHORT)
-						.show();
 			}
 		} else if (velocityY < -FLING_VELOCITY
 				|| (scrollDis < -OUT_DISTANCE_BOUDARY)) { // 上移
@@ -261,8 +260,6 @@ public class JellyViewPager extends ViewPager {
 				rotateSpring.setAtRest();
 			} else {
 				rotateSpring.setEndValue(0);
-				Toast.makeText(getContext(), "已经是第一条", Toast.LENGTH_SHORT)
-						.show();
 			}
 		} else {
 			// 不移动

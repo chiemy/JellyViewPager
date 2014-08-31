@@ -1,10 +1,14 @@
-package com.example.cviewpager;
+package com.chiemy.jellyviewpager;
 
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.View;
+import android.widget.Toast;
+
+import com.chiemy.jellyviewpager.R;
+import com.chiemy.jellyviewpager.widget.JellyViewPager;
 
 public class MainActivity extends FragmentActivity {
 	JellyViewPager pager;
@@ -21,17 +25,13 @@ public class MainActivity extends FragmentActivity {
 			public void onPageScrollStateChanged(int state) {
 				switch(state){
 				case 1: //正在滑动
-					System.out.println(">>>正在滑动");
 					break;
 				case 2: //滑动结束
-					System.out.println(">>>滑动结束");
 					break;
 				}
 			}
-
 			@Override
 			public void onPageScrolled(int arg0, float arg1, int arg2) {
-				System.out.println(">>>onPageScrolled");
 			}
 
 			@Override

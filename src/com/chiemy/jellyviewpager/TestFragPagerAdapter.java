@@ -1,5 +1,8 @@
-package com.example.cviewpager;
+package com.chiemy.jellyviewpager;
 
+import com.chiemy.jellyviewpager.util.Constant;
+
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -13,7 +16,11 @@ public class TestFragPagerAdapter extends FragmentPagerAdapter {
 
 	@Override
 	public Fragment getItem(int arg0) {
-		return new TestFragment();
+		Bundle bundle = new Bundle();
+		bundle.putInt(Constant.KEY, Constant.images[arg0%getCount()]);
+		Fragment frag = new TestFragment();
+		frag.setArguments(bundle);
+		return frag;
 	}
 
 	@Override

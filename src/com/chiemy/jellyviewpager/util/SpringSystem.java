@@ -1,4 +1,4 @@
-package com.example.cviewpager;
+package com.chiemy.jellyviewpager.util;
 
 import com.facebook.rebound.BaseSpringSystem;
 import com.facebook.rebound.SpringLooper;

@@ -2,6 +2,7 @@ package com.example.cviewpager;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
@@ -12,6 +13,7 @@ import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
@@ -32,8 +34,8 @@ public class JellyViewPager extends ViewPager {
 	/**
 	 * 滑动的最低速度
 	 */
-	private static final float FLING_VELOCITY = 500; // 100毫秒速度
-	private static final int UNIT = 100; // 计算速率的单位（毫秒）
+	private static float FLING_VELOCITY = 500;
+	private static final int UNIT = 1000; // 计算速率的单位（毫秒）
 
 	/**
 	 * 手指滑动的距离，大于此距离时，移出屏幕
@@ -41,11 +43,12 @@ public class JellyViewPager extends ViewPager {
 	private static float OUT_DISTANCE_BOUDARY;
 
 	private static float MAX_DEGREE = 15;
+	
+	private float mTouchSlop;
 
 	private VelocityTracker vTracker;
 
 	private PagerAdapter mAdapter;
-	private MyTouchListener mListener;
 	private Spring mScaleSpring;
 	private Spring tranSpring;
 	private Spring rotateSpring;
@@ -54,14 +57,16 @@ public class JellyViewPager extends ViewPager {
 	private final ExampleSpringListener mSpringListener = new ExampleSpringListener();
 
 	private View currentView;
+	private Rect currentViewRect = new Rect();
+	
 	private int currentItem = -1;
 
 	/**
 	 * 屏幕高度
 	 */
-	private int screenHeight, screenWidth;
+	private int mHeight, mWidth;
 
-	private OnJellyPageChangeListener pageChangeListener;
+	private OnPageChangeListener pageChangeListener;
 	
 	private SparseArray<Object> objs = new SparseArray<Object>();
 
@@ -77,7 +82,6 @@ public class JellyViewPager extends ViewPager {
 
 	private void init(Context context) {
 		super.setOnPageChangeListener(new MyPageChageListener());
-		mListener = new MyTouchListener();
 
 		mScaleSpring = mSpringSystem.createSpring();
 		tranSpring = mSpringSystem.createSpring();
@@ -85,22 +89,22 @@ public class JellyViewPager extends ViewPager {
 		mScaleSpring.addListener(mSpringListener);
 		tranSpring.addListener(mSpringListener);
 		rotateSpring.addListener(mSpringListener);
-
-		DisplayMetrics merics = context.getResources().getDisplayMetrics();
-		screenHeight = merics.heightPixels;
-		screenWidth = merics.widthPixels;
-
-		OUT_DISTANCE_BOUDARY = MAX_SCALE * screenHeight / 3;
+		
+		ViewConfiguration configuration = ViewConfiguration.get(context);
+		//FLING_VELOCITY = configuration.getScaledMaximumFlingVelocity();
+		mTouchSlop = configuration.getScaledTouchSlop();
 	}
 
-	public void setOnPageChangeListener(OnJellyPageChangeListener listener) {
-		pageChangeListener = listener;
-	}
 	
 	@Override
 	public void setAdapter(PagerAdapter adapter) {
 		mAdapter = adapter;
 		super.setAdapter(new ViewPagerAdapter());
+	}
+	
+	@Override
+	public void setOnPageChangeListener(OnPageChangeListener listener) {
+		pageChangeListener = listener;
 	}
 
 	/**
@@ -126,7 +130,7 @@ public class JellyViewPager extends ViewPager {
 	 */
 	public void showNext() {
 		resetSpring();
-		animOutIfNeeded(screenHeight, 0);
+		animOutIfNeeded(mHeight, 0);
 	}
 
 	/**
@@ -134,7 +138,7 @@ public class JellyViewPager extends ViewPager {
 	 */
 	public void showPre() {
 		resetSpring();
-		animOutIfNeeded(-screenHeight, 0);
+		animOutIfNeeded(-mHeight, 0);
 	}
 
 	private void nextPage() {
@@ -170,7 +174,6 @@ public class JellyViewPager extends ViewPager {
 	 */
 	private View getCurrentView() {
 		View view = findViewFromObject(getCurrentItem());
-		render(view);
 		return view;
 	}
 
@@ -211,68 +214,21 @@ public class JellyViewPager extends ViewPager {
 		}
 		
 	}
-
+	
 	@Override
 	protected void onLayout(boolean arg0, int arg1, int arg2, int arg3, int arg4) {
 		super.onLayout(arg0, arg1, arg2, arg3, arg4);
 		if(currentView == null){
-			currentView = findViewFromObject(0);
-			if(currentView != null){
-				currentView.setScaleX(MAX_SCALE);
-				currentView.setScaleY(MAX_SCALE);
-				render(currentView);
-			}
+			currentView = getCurrentView();
+			currentView.setScaleX(MAX_SCALE);
+			currentView.setScaleY(MAX_SCALE);
+			currentView.getHitRect(currentViewRect);
 		}
+		mHeight = getHeight();
+		mWidth = getWidth();
+		OUT_DISTANCE_BOUDARY = MAX_SCALE * mHeight / 3;
 	}
 
-	private void render(View view) {
-		view.setOnTouchListener(mListener);
-	}
-
-	private float downY, downX;
-	private float distance;
-
-	private class MyTouchListener implements OnTouchListener {
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			float currentY = event.getRawY();
-			switch (event.getAction()) {
-			case MotionEvent.ACTION_DOWN:
-				if (vTracker == null) {
-					vTracker = VelocityTracker.obtain();
-				} else {
-					vTracker.clear();
-				}
-				vTracker.addMovement(event);
-				distance = 0;
-				downY = event.getRawY();
-				downX = event.getRawX();
-				resetSpring();
-				break;
-			case MotionEvent.ACTION_MOVE:
-				vTracker.addMovement(event);
-				distance = currentY - downY;
-				tranSpring.setEndValue(distance);
-				float degree = MAX_DEGREE * distance / screenHeight;
-				if (downX < screenWidth / 2) {
-					degree = -degree;
-				}
-				rotateSpring.setEndValue(degree);
-				break;
-			case MotionEvent.ACTION_CANCEL:
-			case MotionEvent.ACTION_UP:
-				vTracker.computeCurrentVelocity(UNIT);
-				float velocityY = vTracker.getYVelocity();
-				animOutIfNeeded(distance, velocityY);
-				if (vTracker != null) {
-					vTracker.recycle();
-					vTracker = null;
-				}
-				break;
-			}
-			return true;
-		}
-	}
 
 	/**
 	 * 移出视图动画
@@ -288,7 +244,7 @@ public class JellyViewPager extends ViewPager {
 		// 下移
 		if (velocityY > FLING_VELOCITY || (scrollDis > OUT_DISTANCE_BOUDARY)) {
 			if (hasNext()) {
-				tranY = screenHeight;
+				tranY = mHeight;
 				// 和endvalue不相等，不会rest，下一个view会出现旋转，所以要设置为rest
 				rotateSpring.setAtRest();
 			} else {
@@ -300,7 +256,7 @@ public class JellyViewPager extends ViewPager {
 		} else if (velocityY < -FLING_VELOCITY
 				|| (scrollDis < -OUT_DISTANCE_BOUDARY)) { // 上移
 			if (hasPre()) {
-				tranY = -screenHeight;
+				tranY = -mHeight;
 				rotateSpring.setAtRest();
 			} else {
 				rotateSpring.setEndValue(0);
@@ -334,9 +290,9 @@ public class JellyViewPager extends ViewPager {
 			if (springId.equals(tranSpring.getId())) {
 				currentView.setTranslationY(value);
 				if (spring.isAtRest()) {
-					if (value >= screenHeight) {
+					if (value >= mHeight) {
 						nextPage();
-					} else if (value <= -screenHeight) {
+					} else if (value <= -mHeight) {
 						prePage();
 					}
 				}
@@ -394,6 +350,96 @@ public class JellyViewPager extends ViewPager {
 		API_11 = Build.VERSION.SDK_INT >= 11;
 	}
 
+	
+	private float downY, downX,distanceY;
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		if (vTracker == null) {
+			vTracker = VelocityTracker.obtain();
+		}
+		vTracker.addMovement(event);
+		float currentY = event.getY();
+		switch (event.getAction()) {
+		case MotionEvent.ACTION_DOWN:
+			downY = event.getY();
+			downX = event.getX();
+			if(!currentViewRect.contains((int)downX, (int)downY)){
+				return false;
+			}
+			break;
+		case MotionEvent.ACTION_MOVE:
+			distanceY = currentY - downY;
+			if(Math.abs(distanceY) > mTouchSlop){
+				if(pageChangeListener != null){
+					pageChangeListener.onPageScrolled(currentItem, (int)Math.abs(distanceY)/getHeight(), (int)distanceY);
+					pageChangeListener.onPageScrollStateChanged(SCROLL_STATE_DRAGGING);
+				}
+				tranSpring.setEndValue(distanceY);
+				float degree = MAX_DEGREE * distanceY / mHeight;
+				if (downX < mWidth / 2) {
+					degree = -degree;
+				}
+				rotateSpring.setEndValue(degree);
+			}
+			break;
+		case MotionEvent.ACTION_CANCEL:
+		case MotionEvent.ACTION_UP:
+			if(Math.abs(distanceY) > mTouchSlop){
+				if(pageChangeListener != null){
+					pageChangeListener.onPageScrollStateChanged(SCROLL_STATE_SETTLING);
+				}
+				final VelocityTracker tracker = vTracker;
+				tracker.computeCurrentVelocity(UNIT);
+				float velocityY = tracker.getYVelocity();
+				animOutIfNeeded(currentY - downY, velocityY);
+				if (vTracker != null) {
+					vTracker.recycle();
+					vTracker = null;
+				}
+			}
+			break;
+		}
+		return true;
+	}
+
+	@Override
+	public boolean onInterceptTouchEvent(MotionEvent event) {
+		if (vTracker == null) {
+			vTracker = VelocityTracker.obtain();
+		}
+		vTracker.addMovement(event);
+		float currentY = event.getY();
+		switch (event.getAction()) {
+		case MotionEvent.ACTION_DOWN:
+			downY = event.getY();
+			downX = event.getX();
+			resetSpring();
+			break;
+		case MotionEvent.ACTION_MOVE:
+			float distance = Math.abs(currentY - downY);
+			if(distance > mTouchSlop){
+				 //拦截，不向下传递
+				return true;
+			}
+			break;
+		case MotionEvent.ACTION_CANCEL:
+		case MotionEvent.ACTION_UP:
+			final VelocityTracker tracker = vTracker;
+			tracker.computeCurrentVelocity(UNIT);
+			float velocityY = tracker.getYVelocity();
+			if (vTracker != null) {
+				vTracker.recycle();
+				vTracker = null;
+			}
+			if(velocityY > FLING_VELOCITY){
+				//拦截，不向下传递
+				return true;
+			}
+			break;
+		}
+		return false;
+	}
+	
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	private void manageLayer(View v, boolean enableHardware) {
 		if (!API_11)
@@ -415,24 +461,7 @@ public class JellyViewPager extends ViewPager {
 				v.setLayerType(View.LAYER_TYPE_NONE, null);
 		}
 	}
-
 	
-	
-	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-		return false;
-	}
-
-	@Override
-	public boolean onInterceptTouchEvent(MotionEvent event) {
-		return false;
-	}
-	
-	@Override
-	@Deprecated
-	public void setOnPageChangeListener(OnPageChangeListener listener) {
-		throw new RuntimeException("setCurrentItem cannot be used.");
-	}
 	
 	@Override
 	@Deprecated

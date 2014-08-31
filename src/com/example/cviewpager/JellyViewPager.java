@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.facebook.rebound.BaseSpringSystem;
 import com.facebook.rebound.SimpleSpringListener;
 import com.facebook.rebound.Spring;
+import com.nineoldandroids.view.ViewHelper;
 
 public class JellyViewPager extends ViewPager {
 	/**
@@ -220,8 +221,8 @@ public class JellyViewPager extends ViewPager {
 		super.onLayout(arg0, arg1, arg2, arg3, arg4);
 		if(currentView == null){
 			currentView = getCurrentView();
-			currentView.setScaleX(MAX_SCALE);
-			currentView.setScaleY(MAX_SCALE);
+			ViewHelper.setScaleX(currentView, MAX_SCALE);
+			ViewHelper.setScaleY(currentView, MAX_SCALE);
 			currentView.getHitRect(currentViewRect);
 		}
 		mHeight = getHeight();
@@ -288,7 +289,7 @@ public class JellyViewPager extends ViewPager {
 			float value = (float) spring.getCurrentValue();
 			String springId = spring.getId();
 			if (springId.equals(tranSpring.getId())) {
-				currentView.setTranslationY(value);
+				ViewHelper.setTranslationY(currentView, value);
 				if (spring.isAtRest()) {
 					if (value >= mHeight) {
 						nextPage();
@@ -297,10 +298,10 @@ public class JellyViewPager extends ViewPager {
 					}
 				}
 			} else if (springId.equals(mScaleSpring.getId())) {
-				currentView.setScaleX(value);
-				currentView.setScaleY(value);
+				ViewHelper.setScaleX(currentView,value);
+				ViewHelper.setScaleY(currentView,value);
 			} else if (springId.equals(rotateSpring.getId())) {
-				currentView.setRotation(value);
+				ViewHelper.setRotation(currentView,value);
 			}
 		}
 	}
@@ -320,8 +321,8 @@ public class JellyViewPager extends ViewPager {
 				pageChangeListener.onPageSelected(position);
 			}
 			if (currentView != null) {
-				currentView.setTranslationY(0);
-				currentView.setRotation(0);
+				ViewHelper.setTranslationY(currentView,0);
+				ViewHelper.setRotation(currentView,0);
 			}
 			mScaleSpring.setCurrentValue(MIN_SCALE);
 			mScaleSpring.setEndValue(MAX_SCALE);

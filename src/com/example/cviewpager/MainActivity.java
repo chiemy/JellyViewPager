@@ -3,12 +3,8 @@ package com.example.cviewpager;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
 
 public class MainActivity extends FragmentActivity {
 	JellyViewPager pager;
@@ -20,11 +16,28 @@ public class MainActivity extends FragmentActivity {
 		pager = (JellyViewPager) findViewById(R.id.myViewPager1);
 		//pager.setAdapter(new TestPagerAdapter(this));
 		pager.setAdapter(new TestFragPagerAdapter(getSupportFragmentManager()));
-		pager.setOnPageChangeListener(new OnJellyPageChangeListener() {
+		pager.setOnPageChangeListener(new OnPageChangeListener() {
 			@Override
-			public void onPageSelected(int position) {
-				
+			public void onPageScrollStateChanged(int state) {
+				switch(state){
+				case 1: //正在滑动
+					System.out.println(">>>正在滑动");
+					break;
+				case 2: //滑动结束
+					System.out.println(">>>滑动结束");
+					break;
+				}
 			}
+
+			@Override
+			public void onPageScrolled(int arg0, float arg1, int arg2) {
+				System.out.println(">>>onPageScrolled");
+			}
+
+			@Override
+			public void onPageSelected(int arg0) {
+			}
+			
 		});
 	}
 	

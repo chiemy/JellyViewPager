@@ -8,16 +8,17 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.chiemy.jellyviewpager.R;
+import com.chiemy.jellyviewpager.widget.JellyHorizontalViewPager;
 import com.chiemy.jellyviewpager.widget.JellyViewPager;
 
 public class MainActivity extends FragmentActivity {
-	JellyViewPager pager;
+	JellyHorizontalViewPager pager;
 	int currentItem;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		pager = (JellyViewPager) findViewById(R.id.myViewPager1);
+		pager = (JellyHorizontalViewPager) findViewById(R.id.myViewPager1);
 		//pager.setAdapter(new TestPagerAdapter(this));
 		pager.setAdapter(new TestFragPagerAdapter(getSupportFragmentManager()));
 		pager.setOnPageChangeListener(new OnPageChangeListener() {

@@ -4,14 +4,14 @@
     android:background="#363636"
     >
 
-    <com.chiemy.jellyviewpager.widget.JellyViewPager
+    <com.chiemy.jellyviewpager.widget.JellyHorizontalViewPager
         android:id="@+id/myViewPager1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/handle"
         >
         
-    </com.chiemy.jellyviewpager.widget.JellyViewPager>
+    </com.chiemy.jellyviewpager.widget.JellyHorizontalViewPager>
 
     <LinearLayout
         android:id="@+id/handle"
